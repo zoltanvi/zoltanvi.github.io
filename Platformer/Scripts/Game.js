@@ -17,6 +17,21 @@ let levelObjects = [];
 let player;
 let cameraOffsetX = 0;
 let cameraOffsetY = 0;
+let tileHeight = 32;
+let tileWidth = 32;
+
+let tiles = {
+	topLeft : "sprites/Tiles/TL.png",
+	topCenter : "sprites/Tiles/TM.png",
+	topRight : "sprites/Tiles/TR.png",
+	center : "sprites/Tiles/MM.png",
+	noBottom : "sprites/Tiles/noBottom.png",
+	single : "sprites/Tiles/Single.png",
+
+};
+
+let map = [];
+let mapWidth = 0, mapHeight = level.length;
 
 window.addEventListener("keydown", keyDownHandler, false);
 window.addEventListener("keyup", keyUpHandler, false);
@@ -63,9 +78,12 @@ function gameLoop() {
 
 	const drawStart = Date.now();
 	deltaTime = (drawStart - startTime) / redrawInterval;
-
-
-	// console.log(deltaTime);
+	if(deltaTime < 0){
+		deltaTime = 0;
+	} else if(deltaTime > 1){
+		deltaTime = 1;
+	}
+	// deltaTime = (deltaTime > 1) ? 1 : deltaTime;
 	update();
 	draw();
 
@@ -76,18 +94,52 @@ function gameLoop() {
 
 function initGame() {
 
-	// TODO: map generator from ascii text
-	levelObjects.push(new Ground(0, gamePanel.height - 20, gamePanel.width * 3, 20));
-	levelObjects.push(new Ground(0, gamePanel.height - 150, gamePanel.width / 2, 10));
-	levelObjects.push(new Ground(0, gamePanel.height - 250, gamePanel.width / 2, 10));
-	levelObjects.push(new Ground(0, gamePanel.height - 350, gamePanel.width / 2, 10));
+	// Initializes the map
+	for (let i = 0; i < level.length; i++) {
+		for (let j = 0; j < level[i].length; j++) {
+			mapWidth = (j > mapWidth) ? j : mapWidth;
+			map[j] = [];
+		}
+	}
 
-	levelObjects.push(new Ground(0, gamePanel.height - 450, gamePanel.width / 2, 10, "#7a4aff"));
+	// Creates the map
+	for (let i = 0; i < level.length; i++) {
+		for (let j = 0; j < level[i].length; j++) {
 
-	levelObjects.push(new Ground(gamePanel.width / 2 + 70, gamePanel.height - 100, 20, 100));
-	levelObjects.push(new Ground(600, gamePanel.height - 180, 60, 100));
+			let left = false;
+			let right = false;
+			let top = false;
+			let bottom = false;
 
-	player = new Player(0, 50, 32, 44, levelObjects);
+
+			if(level[i].charAt(j) === "#"){
+				if(i - 1 >= 0 && level[i - 1].charAt(j) === "#") top = true;
+				if(i + 1 <= level.length - 1 && level[i + 1].charAt(j) === "#")	bottom = true;
+				if(j - 1 >= 0 && level[i].charAt(j - 1) === "#") left = true;
+				if(j + 1 <= level[i].length - 1 && level[i].charAt(j + 1) === "#") right = true;
+
+				if(!top && !left && right){
+					map[i][j] = new Tile(j * tileWidth, i * tileHeight, tileWidth, tileHeight, tiles.topLeft);
+				} else if(!top && left && !right){
+					map[i][j] = new Tile(j * tileWidth, i * tileHeight, tileWidth, tileHeight, tiles.topRight);
+				} else if(!top && left && right){
+					map[i][j] = new Tile(j * tileWidth, i * tileHeight, tileWidth, tileHeight, tiles.topCenter);
+				} else if(!top && !bottom && !left && !right) {
+					map[i][j] = new Tile(j * tileWidth, i * tileHeight, tileWidth, tileHeight, tiles.single);
+				} else if(bottom && !left && !right && !top) {
+					map[i][j] = new Tile(j * tileWidth, i * tileHeight, tileWidth, tileHeight, tiles.noBottom);
+				} else {
+					map[i][j] = new Tile(j * tileWidth, i * tileHeight, tileWidth, tileHeight, tiles.center);
+				}
+			}
+
+			if(level[i].charAt(j) === "@"){
+				player = new Player(j * tileWidth, i * tileHeight, 28, 44);
+			}
+
+		}
+	}
+
 }
 
 
@@ -107,15 +159,19 @@ function update() {
 
 function draw() {
 	// draws background
-	c.fillStyle = "#f2efe8";
+	c.fillStyle = "#9ec5e0";
 	c.fillRect(0, 0, gamePanel.width, gamePanel.height);
 
 	// draws the level
-	for (let i = 0; i < levelObjects.length; i++) {
-		levelObjects[i].draw();
+	for (let i = 0; i < map.length; i++) {
+		for (let j = 0; j < map[i].length; j++) {
+			if(map[i][j] != null){
+				map[i][j].render();
+			}
+		}
 	}
 
 	// draws the player
-	player.draw();
+	player.render();
 
 }

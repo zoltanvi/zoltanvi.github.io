@@ -28,15 +28,25 @@ class GameObject {
 		this.applyVelocity();
 	}
 
-	draw() {
+	render() {
 		// Optimalization, it only draws what is inside the viewport
-		if (this.right > cameraOffsetX) {
+		if (this.right > cameraOffsetX &&
+			this.left < cameraOffsetX + gamePanel.width &&
+			this.bottom > cameraOffsetY &&
+			this.top < cameraOffsetY + gamePanel.height) {
+
 			c.save();
-			c.translate(-cameraOffsetX, cameraOffsetY);
-			c.fillStyle = this.color;
-			c.fillRect(this.x, this.y, this.width, this.height);
+			c.translate(-cameraOffsetX, -cameraOffsetY);
+
+			this.draw();
+
 			c.restore();
 		}
+	}
+
+	draw() {
+		c.fillStyle = this.color;
+		c.fillRect(this.x, this.y, this.width, this.height);
 	}
 
 	calculateBounds() {
