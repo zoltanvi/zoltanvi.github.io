@@ -27,6 +27,17 @@ let tiles = {
 	center : "sprites/Tiles/MM.png",
 	noBottom : "sprites/Tiles/noBottom.png",
 	single : "sprites/Tiles/Single.png",
+	sideBoth : "sprites/Tiles/SB.png",
+	sideLeft : "sprites/Tiles/SL.png",
+	sideRight : "sprites/Tiles/SR.png",
+	bottomLeft : "sprites/Tiles/BL.png",
+	bottomCenter : "sprites/Tiles/BM.png",
+	bottomRight : "sprites/Tiles/BR.png",
+	topBoth : "sprites/Tiles/TB.png",
+	exceptRight : "sprites/Tiles/ER.png", 
+	exceptLeft : "sprites/Tiles/EL.png"
+	
+	
 
 };
 
@@ -118,19 +129,28 @@ function initGame() {
 				if(j - 1 >= 0 && level[i].charAt(j - 1) === "#") left = true;
 				if(j + 1 <= level[i].length - 1 && level[i].charAt(j + 1) === "#") right = true;
 
-				if(!top && !left && right){
-					map[i][j] = new Tile(j * tileWidth, i * tileHeight, tileWidth, tileHeight, tiles.topLeft);
-				} else if(!top && left && !right){
-					map[i][j] = new Tile(j * tileWidth, i * tileHeight, tileWidth, tileHeight, tiles.topRight);
-				} else if(!top && left && right){
-					map[i][j] = new Tile(j * tileWidth, i * tileHeight, tileWidth, tileHeight, tiles.topCenter);
-				} else if(!top && !bottom && !left && !right) {
-					map[i][j] = new Tile(j * tileWidth, i * tileHeight, tileWidth, tileHeight, tiles.single);
-				} else if(bottom && !left && !right && !top) {
-					map[i][j] = new Tile(j * tileWidth, i * tileHeight, tileWidth, tileHeight, tiles.noBottom);
-				} else {
-					map[i][j] = new Tile(j * tileWidth, i * tileHeight, tileWidth, tileHeight, tiles.center);
-				}
+				let tileType;
+				
+				
+				if     (!top &&  bottom && !left &&  right) tileType = tiles.topLeft;
+				else if(!top &&  bottom &&  left && !right) tileType = tiles.topRight;
+				else if(!top &&  bottom &&  left &&  right) tileType = tiles.topCenter;
+				else if(!top && !bottom && !left && !right) tileType = tiles.single;
+				else if(!top &&  bottom && !left && !right) tileType = tiles.noBottom;
+				else if( top &&  bottom && !left &&  right) tileType = tiles.sideLeft;
+				else if( top &&  bottom &&  left && !right) tileType = tiles.sideRight;
+				else if( top && !bottom && !left &&  right) tileType = tiles.bottomLeft;
+				else if( top && !bottom &&  left &&  right) tileType = tiles.bottomCenter;
+				else if( top && !bottom &&  left && !right) tileType = tiles.bottomRight;	
+				else if(!top && !bottom &&  left &&  right) tileType = tiles.topBoth;	
+				else if(!top && !bottom &&  left && !right) tileType = tiles.exceptLeft;	
+				else if(!top && !bottom && !left &&  right) tileType = tiles.exceptRight;	
+				else if( top &&  bottom && !left && !right) tileType = tiles.sideBoth;
+				else                                        tileType = tiles.center;
+				
+				
+				map[i][j] = new Tile(j * tileWidth, i * tileHeight, tileWidth, tileHeight, tileType);
+				
 			}
 
 			if(level[i].charAt(j) === "@"){
