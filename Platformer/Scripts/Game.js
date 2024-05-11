@@ -1,7 +1,10 @@
 const gamePanel = document.getElementById("gamePanel");
 const c = gamePanel.getContext("2d");
 
-const requestAnimationFrame = window.requestAnimationFrame || window.webkitRequestAnimationFrame;
+var requestAnimationFrame = window.requestAnimationFrame ||
+    window.mozRequestAnimationFrame ||
+    window.webkitRequestAnimationFrame ||
+    window.msRequestAnimationFrame;
 
 let startTime;
 let leftPressed = false;
@@ -36,9 +39,6 @@ let tiles = {
 	topBoth : "sprites/Tiles/TB.png",
 	exceptRight : "sprites/Tiles/ER.png", 
 	exceptLeft : "sprites/Tiles/EL.png"
-	
-	
-
 };
 
 let map = [];
@@ -46,6 +46,47 @@ let mapWidth = 0, mapHeight = level.length;
 
 window.addEventListener("keydown", keyDownHandler, false);
 window.addEventListener("keyup", keyUpHandler, false);
+
+window.onload = function () {
+	initGame();
+	startTime = Date.now();
+	startAnimating(60);
+};
+
+function startAnimating(fps) {
+    fpsInterval = 1000 / fps;
+    then = Date.now();
+    startTime = then;
+    console.log(startTime);
+    animate();
+}
+
+function animate() {
+
+    // request another frame
+    requestAnimationFrame(animate);
+
+    // calc elapsed time since last loop
+    now = Date.now();
+    elapsed = now - then;
+
+    // if enough time has elapsed, draw the next frame
+    if (elapsed > fpsInterval) {
+
+        // Get ready for next frame by setting then=now, but...
+        // Also, adjust for fpsInterval not being multiple of 16.67
+        then = now - (elapsed % fpsInterval);
+
+        // draw next frame
+        gameLoop();
+
+        // TESTING...Report #seconds since start and achieved fps.
+        var sinceStart = now - startTime;
+        var currentFps = Math.round(1000 / (sinceStart / ++frameCount) * 100) / 100;
+        $results.text("Elapsed time= " + Math.round(sinceStart / 1000 * 100) / 100 + " secs @ " + currentFps + " fps.");
+    }
+}
+
 
 function keyDownHandler(e) {
 	const k = e.key;
@@ -98,9 +139,8 @@ function gameLoop() {
 	update();
 	draw();
 
-
 	startTime = drawStart;
-	requestAnimationFrame(gameLoop);
+
 }
 
 function initGame() {
@@ -161,13 +201,6 @@ function initGame() {
 	}
 
 }
-
-
-window.onload = function () {
-	initGame();
-	startTime = Date.now();
-	requestAnimationFrame(gameLoop);
-};
 
 
 function update() {
